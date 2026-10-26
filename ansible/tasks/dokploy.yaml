@@ -1,0 +1,32 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install prerequisite packages
+  apt:
+    name:
+      - curl
+      - sudo
+      - ca-certificates
+      - gnupg
+      - lsb-release
+    state: present
+
+- name: Download and run Dokploy official install script
+  shell: "curl -sSL https://dokploy.com/install.sh | bash"
+  register: dokploy_install
+  changed_when: "'Dokploy installed successfully' in dokploy_install.stdout"
+
+- name: Ensure Docker service is enabled and running
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Wait for Dokploy container to be healthy on port 3000
+  wait_for:
+    port: 3000
+    delay: 5
+    timeout: 120

@@ -1,0 +1,9 @@
+# Ignore all Packer variable files containing sensitive IDs/keys
+*.pkrvars.hcl
+
+# Ignore Packer cache and built artifacts
+.packer.cache/
+*.box
+
+# Ignore Ansible retry files
+*.retry

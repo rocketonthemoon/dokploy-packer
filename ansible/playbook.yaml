@@ -1,0 +1,12 @@
+---
+- name: Install Dokploy Server
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Set up Dokploy
+      import_tasks: tasks/dokploy.yaml
+
+    - name: Configure UFW Firewall
+      import_tasks: tasks/ufw.yaml

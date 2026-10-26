@@ -1,0 +1,39 @@
+---
+- name: Ensure UFW is installed
+  apt:
+    name: ufw
+    state: present
+
+- name: Configure UFW default policies
+  ufw:
+    direction: "{{ item.direction }}"
+    policy: "{{ item.policy }}"
+  loop:
+    - { direction: "incoming", policy: "deny" }
+    - { direction: "outgoing", policy: "allow" }
+
+- name: Allow all traffic on loopback interface (internal Docker communication)
+  ufw:
+    rule: allow
+    interface: lo
+    direction: in
+
+- name: Allow SSH on port 22
+  ufw:
+    rule: allow
+    port: "22"
+    proto: tcp
+
+- name: Allow Web traffic (HTTP/HTTPS) and Dokploy UI
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - "80"
+    - "443"
+    - "3000"
+
+- name: Enable UFW service and firewall
+  ufw:
+    state: enabled

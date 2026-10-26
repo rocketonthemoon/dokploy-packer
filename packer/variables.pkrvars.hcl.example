@@ -1,0 +1,3 @@
+subscription_id = "<YOUR_AZURE_SUBSCRIPTION_ID>"
+vm_size = "<YOUR_VM_SIZE>"
+location = "<YOUR_LOCATION>"
