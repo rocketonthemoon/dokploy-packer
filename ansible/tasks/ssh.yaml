@@ -1,0 +1,40 @@
+---
+- name: Ensure SSH drop-in configuration directory exists
+  file:
+    path: /etc/ssh/sshd_config.d
+    state: directory
+    mode: '0755'
+
+- name: Disable SSH password authentication via drop-in configuration
+  copy:
+    dest: /etc/ssh/sshd_config.d/01-disable-password-auth.conf
+    content: |
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      AuthenticationMethods publickey
+    mode: '0644'
+
+- name: Ensure PasswordAuthentication is disabled in main sshd_config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+    state: present
+
+- name: Disable password authentication in any existing cloud-init drop-in configs
+  shell: |
+    sed -i 's/^PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config.d/*.conf 2>/dev/null || true
+  changed_when: false
+
+- name: Ensure cloud-init disables password authentication on subsequent boots
+  lineinfile:
+    path: /etc/cloud/cloud.cfg
+    regexp: '^ssh_pwauth:'
+    line: 'ssh_pwauth: false'
+    state: present
+  ignore_errors: true
+
+- name: Restart SSH service
+  systemd:
+    name: ssh
+    state: restarted

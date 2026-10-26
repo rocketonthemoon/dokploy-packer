@@ -89,22 +89,35 @@ az vm open-port --resource-group dockploy-rg --name dockploy-vm --port 443 --pri
 
 ---
 
-## 5. Access Dokploy
+## 5. Initialize Dokploy on the VM
 
-```text
-http://<VM_PUBLIC_IP>:3000
+Get your VM's public IP:
+```bash
+az vm list-ip-addresses --resource-group dockploy-rg --name dockploy-vm --output table
 ```
 
-Get public IP:
-```powershell
-az vm list-ip-addresses --resource-group dockploy-rg --name dockploy-vm --output table
+SSH into the VM and re-initialize Dokploy (since images are pre-baked, this takes <10s):
+```bash
+ssh azureuser@<VM_PUBLIC_IP>
+
+# Initialize Dokploy with VM's local IP
+curl -sSL https://dokploy.com/install.sh | bash
 ```
 
 ---
 
-## 6. Cost Management
+## 6. Access Dokploy Dashboard
 
-```powershell
+Open in your browser:
+```text
+http://<VM_PUBLIC_IP>:3000
+```
+
+---
+
+## 7. Cost Management
+
+```bash
 # Stop VM (pauses compute billing):
 az vm deallocate --resource-group dockploy-rg --name dockploy-vm
 

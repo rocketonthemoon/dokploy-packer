@@ -10,3 +10,6 @@
 
     - name: Configure UFW Firewall
       import_tasks: tasks/ufw.yaml
+
+    - name: Harden SSH Security (Disable Password Auth)
+      import_tasks: tasks/ssh.yaml

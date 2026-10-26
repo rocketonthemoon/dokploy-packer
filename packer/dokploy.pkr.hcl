@@ -55,7 +55,7 @@ source "azure-arm" "dockploy" {
   shared_image_gallery_destination {
     resource_group      = "dockploy-rg"
     gallery_name        = "dockploy_image_gallery"
-    image_name          = "dockploy_ubuntu_2604_lts"
+    image_name          = "dockploy_ubuntu_2604-lts"
     image_version       = var.image_version
     replication_regions = ["polandcentral"]
   }

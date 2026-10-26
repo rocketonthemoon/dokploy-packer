@@ -14,6 +14,21 @@
       - lsb-release
     state: present
 
+- name: Ensure /etc/docker directory exists
+  file:
+    path: /etc/docker
+    state: directory
+    mode: '0755'
+
+- name: Configure Docker daemon for Traefik API compatibility
+  copy:
+    content: |
+      {
+        "min-api-version": "1.24"
+      }
+    dest: /etc/docker/daemon.json
+    mode: '0644'
+
 - name: Download and run Dokploy official install script
   shell: "curl -sSL https://dokploy.com/install.sh | bash"
   register: dokploy_install
@@ -30,3 +45,10 @@
     port: 3000
     delay: 5
     timeout: 120
+
+- name: Clean up temporary Swarm and volumes so fresh VM initializes cleanly
+  shell: |
+    docker swarm leave --force 2>/dev/null || true
+    docker volume rm -f dokploy dokploy-postgres 2>/dev/null || true
+    rm -rf /etc/dokploy
+

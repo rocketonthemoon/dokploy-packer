@@ -4,6 +4,12 @@
     name: ufw
     state: present
 
+- name: Set UFW default forward policy to ACCEPT for Docker routing
+  lineinfile:
+    path: /etc/default/ufw
+    regexp: '^DEFAULT_FORWARD_POLICY='
+    line: 'DEFAULT_FORWARD_POLICY="ACCEPT"'
+
 - name: Configure UFW default policies
   ufw:
     direction: "{{ item.direction }}"
@@ -12,11 +18,15 @@
     - { direction: "incoming", policy: "deny" }
     - { direction: "outgoing", policy: "allow" }
 
-- name: Allow all traffic on loopback interface (internal Docker communication)
+- name: Allow all traffic on loopback and Docker interfaces
   ufw:
     rule: allow
-    interface: lo
+    interface: "{{ item }}"
     direction: in
+  loop:
+    - lo
+    - docker0
+    - docker_gwbridge
 
 - name: Allow SSH on port 22
   ufw:
@@ -33,6 +43,18 @@
     - "80"
     - "443"
     - "3000"
+
+- name: Allow Docker Swarm cluster communication ports
+  ufw:
+    rule: allow
+    src: "10.0.0.0/16"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  loop:
+    - { port: "2377", proto: "tcp" }
+    - { port: "7946", proto: "tcp" }
+    - { port: "7946", proto: "udp" }
+    - { port: "4789", proto: "udp" }
 
 - name: Enable UFW service and firewall
   ufw:
