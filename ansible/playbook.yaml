@@ -1,6 +1,6 @@
 ---
 - name: Install Dokploy Server
-  hosts: all
+  hosts: localhost
   become: true
   gather_facts: true
 

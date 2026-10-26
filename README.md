@@ -23,21 +23,21 @@ az account show --query id -o tsv
 az group create --name dockploy-rg --location <YOUR_LOCATION>
 
 # 2. Create Azure Compute Gallery
-az sig create `
-  --resource-group dockploy-rg `
-  --gallery-name dockploy-image-gallery `
+az sig create \
+  --resource-group dockploy-rg \
+  --gallery-name dockploy_image_gallery \
   --location <YOUR_LOCATION>
 
 # 3. Create Image Definition
-az sig image-definition create `
-  --resource-group dockploy-rg `
-  --gallery-name dockploy-image-gallery `
-  --gallery-image-definition dockploy-ubuntu-2604-lts `
-  --publisher Custom `
-  --offer Ubuntu `
-  --sku 26_04-lts `
-  --os-type Linux `
-  --hyper-v-generation V2 `
+az sig image-definition create \
+  --resource-group dockploy-rg \
+  --gallery-name dockploy_image_gallery \
+  --gallery-image-definition dockploy_ubuntu_2604_lts \
+  --publisher Custom \
+  --offer Ubuntu \
+  --sku 26-04-lts \
+  --os-type Linux \
+  --hyper-v-generation V2 \
   --location <YOUR_LOCATION>
 ```
 
@@ -51,14 +51,22 @@ cd packer
 # 1. Initialize Packer plugins
 packer init .
 
-# 2. Validate configuration
+# 2. Format Packer file
+packer fmt .
+
+# 3. Validate configuration
 packer validate -var-file="variables.pkrvars.hcl" .
 
-# 3. Build image
+# 4. Build image
 packer build -var-file="variables.pkrvars.hcl" .
 ```
 
 ---
+
+> [!NOTE]
+> **About `vm_size`:**
+> - The `vm_size` specified in the Packer template is only used for the temporary build VM while baking the image.
+> - You can choose any suitable VM size when deploying the final VM in Step 4 based on your workload requirements.
 
 ## 4. Deploy VM from Built Image
 
@@ -67,7 +75,7 @@ packer build -var-file="variables.pkrvars.hcl" .
 az vm create `
   --resource-group dockploy-rg `
   --name dockploy-vm `
-  --image "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/dockploy-rg/providers/Microsoft.Compute/galleries/dockploy-image-gallery/images/dockploy-ubuntu-2604-lts/versions/latest" `
+  --image "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/dockploy-rg/providers/Microsoft.Compute/galleries/dockploy_image_gallery/images/dockploy_ubuntu_2604_lts/versions/latest" `
   --size <YOUR_VM_SIZE> `
   --admin-username azureuser `
   --generate-ssh-keys `
