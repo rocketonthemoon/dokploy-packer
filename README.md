@@ -72,13 +72,13 @@ packer build -var-file="variables.pkrvars.hcl" .
 
 ```powershell
 # Launch VM from Azure Compute Gallery (latest version)
-az vm create `
-  --resource-group dockploy-rg `
-  --name dockploy-vm `
-  --image "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/dockploy-rg/providers/Microsoft.Compute/galleries/dockploy_image_gallery/images/dockploy_ubuntu_2604_lts/versions/latest" `
-  --size <YOUR_VM_SIZE> `
-  --admin-username azureuser `
-  --generate-ssh-keys `
+az vm create \
+  --resource-group dockploy-rg \
+  --name dockploy-vm \
+  --image "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/dockploy-rg/providers/Microsoft.Compute/galleries/dockploy_image_gallery/images/dockploy_ubuntu_2604_lts/versions/latest" \
+  --size <YOUR_VM_SIZE> \
+  --admin-username azureuser \
+  --generate-ssh-keys \
   --public-ip-sku Standard
 
 # Open Dokploy port (3000) on Azure Network Security Group
