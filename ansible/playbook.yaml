@@ -1,12 +1,12 @@
 ---
-- name: Install Dokploy Server
+- name: Configure Docker and Dokploy Base Image
   hosts: localhost
   become: true
   gather_facts: true
 
   tasks:
-    - name: Set up Dokploy
-      import_tasks: tasks/dokploy.yaml
+    - name: Set up Docker & Pre-cache Dokploy Images
+      import_tasks: tasks/images.yaml
 
     - name: Configure UFW Firewall
       import_tasks: tasks/ufw.yaml

@@ -1,0 +1,28 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install prerequisite packages and Docker
+  apt:
+    name:
+      - curl
+      - sudo
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - docker.io
+    state: present
+
+- name: Ensure Docker service is enabled and started
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Pre-pull Dokploy, Traefik, and Postgres images to warm Docker cache
+  shell: |
+    docker pull dokploy/dokploy:latest
+    docker pull traefik:v3.6.25
+    docker pull postgres:16

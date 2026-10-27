@@ -7,7 +7,7 @@
 - name: Set UFW default forward policy to ACCEPT for Docker routing
   lineinfile:
     path: /etc/default/ufw
-    regexp: '^DEFAULT_FORWARD_POLICY='
+    regexp: "^DEFAULT_FORWARD_POLICY="
     line: 'DEFAULT_FORWARD_POLICY="ACCEPT"'
 
 - name: Configure UFW default policies
@@ -44,6 +44,8 @@
     - "443"
     - "3000"
 
+# inter-container ports are allowed for docker swarm (on overlay network) only not for node-to-node traffic
+# not exposed to public internet
 - name: Allow Docker Swarm cluster communication ports
   ufw:
     rule: allow
