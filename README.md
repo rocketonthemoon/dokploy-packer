@@ -1,4 +1,4 @@
-# Dokploy Cluster with Azure Image Gallery Images (Packer + Ansible)
+# Dokploy Swarm Cluster with Azure Image Gallery Images (Packer + Ansible)
 
 Bake and deploy a hardened **Ubuntu 26.04 LTS** Azure VM image pre-loaded with **Docker**, **UFW firewall**, and pre-cached container images (**Dokploy**, **Traefik v3.6.25**, and **Postgres 16**) for near-instant deployment without runtime image downloads.
 
@@ -78,6 +78,8 @@ az vm create \
   --resource-group dockploy-rg \
   --name dockploy-vm \
   --image "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/dockploy-rg/providers/Microsoft.Compute/galleries/dockploy_image_gallery/images/dockploy_ubuntu_2604_lts/versions/latest" \
+  --vnet-name dockploy-vnet \
+  --subnet default \
   --size <YOUR_VM_SIZE> \
   --admin-username azureuser \
   --generate-ssh-keys \
@@ -130,6 +132,8 @@ az vm create \
   --resource-group dockploy-rg \
   --name dockploy-worker-1 \
   --image "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/dockploy-rg/providers/Microsoft.Compute/galleries/dockploy_image_gallery/images/dockploy_ubuntu_2604_lts/versions/latest" \
+  --vnet-name dockploy-vnet \
+  --subnet default \
   --size <YOUR_VM_SIZE> \
   --admin-username azureuser \
   --generate-ssh-keys \
@@ -142,6 +146,8 @@ az vm create \
   --resource-group dockploy-rg \
   --name dockploy-worker-1 \
   --image Ubuntu2404 \
+  --vnet-name dockploy-vnet \
+  --subnet default \
   --size <YOUR_VM_SIZE> \
   --admin-username azureuser \
   --generate-ssh-keys \
@@ -152,15 +158,28 @@ az vm create \
 ### Step 2: Join the Worker to the Cluster
 
 > [!IMPORTANT]
-> **Do NOT run `install.sh` on worker nodes.** Worker nodes only join the existing cluster.
+> **Do NOT run `install.sh` on worker nodes.** Worker nodes only join the existing Swarm cluster.
 
-1. Open your Dokploy Dashboard on the primary manager $\rightarrow$ **Cluster / Nodes** tab.
-2. Copy the **Worker Join Command**:
+1. SSH into the **Primary Manager VM** and get the worker join token:
    ```bash
-   docker swarm join --token <WORKER_TOKEN> <MANAGER_PRIVATE_IP>:2377
+   docker swarm join-token worker
    ```
-3. SSH into `dockploy-worker-1` and run the join command.
-4. The worker will appear in your Dokploy Web UI and start accepting container tasks!
+   *(This prints the exact `docker swarm join --token ...` command).*
+
+2. SSH into **`dockploy-worker-1`** and run the command printed above:
+   ```bash
+   docker swarm join --token <TOKEN> <MANAGER_PRIVATE_IP>:2377
+   ```
+
+3. **Verify the node joined successfully:**
+   Run on the Manager VM:
+   ```bash
+   docker node ls
+   ```
+   You will see both `dockploy-vm` (Leader) and `dockploy-worker-1` (Ready / Active)!
+
+4. **Scale services across the cluster:**
+   Inside Dokploy Dashboard $\rightarrow$ Your App $\rightarrow$ **Advanced** $\rightarrow$ **Cluster Settings**, or specify `deploy.replicas` in your Compose file.
 
 ---
 
