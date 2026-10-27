@@ -46,9 +46,12 @@
     delay: 5
     timeout: 120
 
-- name: Clean up temporary Swarm and volumes so fresh VM initializes cleanly
+- name: Clean up temporary containers, Swarm, and volumes so fresh VM initializes cleanly
   shell: |
+    docker stop dokploy-traefik 2>/dev/null || true
+    docker rm -f dokploy-traefik 2>/dev/null || true
     docker swarm leave --force 2>/dev/null || true
-    docker volume rm -f dokploy dokploy-postgres 2>/dev/null || true
+    docker volume rm -f $(docker volume ls -q) 2>/dev/null || true
+    docker network prune -f 2>/dev/null || true
     rm -rf /etc/dokploy
 
